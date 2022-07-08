@@ -7,3 +7,9 @@ impl Base64Reader {
         Base64Reader {}
     }
 }
+
+impl Read for Base64Reader {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        Ok(0)
+    }
+}
