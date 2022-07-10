@@ -32,6 +32,10 @@ fn test_write_unpadded() -> std::io::Result<()> {
     let mut writer = Base64Writer::new(&mut buffer);
     let count = writer.write("Foo".as_bytes())?;
     assert_eq!(4, count, "3 input bytes should produce 4 output bytes");
-    assert_eq!("Rm9v".as_bytes(), buffer, "\"Foo\" should encode to \"Rm9v\"");
+    assert_eq!(
+        "Rm9v".as_bytes(),
+        buffer,
+        "\"Foo\" should encode to \"Rm9v\""
+    );
     Ok(())
 }
