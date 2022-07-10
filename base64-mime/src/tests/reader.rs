@@ -38,7 +38,7 @@ fn test_read_one_padding_byte() -> std::io::Result<()> {
 }
 
 #[test]
-fn test_read_two_padding_byte() -> std::io::Result<()> {
+fn test_read_two_padding_bytes() -> std::io::Result<()> {
     let mut reader = Base64Reader::new("Rm==".as_bytes());
     let mut buf: Vec<u8> = Vec::new();
     let count = reader.read_to_end(&mut buf)?;
