@@ -22,8 +22,8 @@ where
         match maybe_word {
             Some(word) => {
                 let mut destination = &mut buf[0..4];
-                decode_word(word, &mut destination);
-                Ok(3)
+                let count = decode_word(word, &mut destination)?;
+                Ok(count)
             }
             None => Ok(0),
         }
@@ -51,11 +51,31 @@ where
     }
 }
 
-fn decode_word(word: [u8; 4], destination: &mut [u8]) {
+fn decode_word(word: [u8; 4], destination: &mut [u8]) -> std::io::Result<usize> {
+    let symbol_count = padding_check(word)?;
     let ordinals = word.map(decode_ordinal);
     destination[0] = (ordinals[0] << 2) | (ordinals[1] >> 4);
+    if symbol_count == 1 {
+        return Ok(1);
+    }
     destination[1] = (ordinals[1] << 4) | (ordinals[2] >> 2);
+    if symbol_count == 2 {
+        return Ok(2);
+    }
     destination[2] = (ordinals[2] << 6) | ordinals[3];
+    Ok(3)
+}
+
+fn padding_check(word: [u8; 4]) -> std::io::Result<u8> {
+    let padding: [bool; 4] = word.map(|x| x == '=' as u8);
+    match padding {
+        [true, _, _, _] | [_, true, _, _] | [false, false, true, false] => {
+            todo!("handle bad padding")
+        }
+        [false, false, false, false] => Ok(3),
+        [false, false, false, true] => Ok(2),
+        [false, false, true, true] => Ok(1),
+    }
 }
 
 fn decode_ordinal(ordinal: u8) -> u8 {
@@ -65,6 +85,7 @@ fn decode_ordinal(ordinal: u8) -> u8 {
         '0'..='9' => 52 + (ordinal - '0' as u8),
         '+' => 62,
         '/' => 63,
+        '=' => 0,
         _ => todo!("Handle bad characters"),
     }
 }
