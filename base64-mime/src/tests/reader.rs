@@ -36,3 +36,13 @@ fn test_read_one_padding_byte() -> std::io::Result<()> {
     assert_eq!("Fo".as_bytes(), buf, "\"Rm9=\" should read as \"Fo\"");
     Ok(())
 }
+
+#[test]
+fn test_read_two_padding_byte() -> std::io::Result<()> {
+    let mut reader = Base64Reader::new("Rm==".as_bytes());
+    let mut buf: Vec<u8> = Vec::new();
+    let count = reader.read_to_end(&mut buf)?;
+    assert_eq!(1, count, "Should read 1 byte");
+    assert_eq!("F".as_bytes(), buf, "\"Rm==\" should read as \"F\"");
+    Ok(())
+}
