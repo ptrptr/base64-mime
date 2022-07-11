@@ -58,3 +58,18 @@ fn test_write_one_padding_byte() -> std::io::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn test_write_two_padding_bytes() -> std::io::Result<()> {
+    let mut buffer: Vec<u8> = Vec::new();
+    let mut writer = Base64Writer::new(&mut buffer);
+    let _ = writer.write("F".as_bytes())?;
+    writer.flush()?;
+    assert_eq!(
+        4,
+        buffer.len(),
+        "1 input bytes should produce 4 output bytes"
+    );
+    assert_eq!("Rg==".as_bytes(), buffer, "\"F\" should encode to \"Rg==\"");
+    Ok(())
+}
