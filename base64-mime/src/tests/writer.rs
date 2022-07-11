@@ -61,6 +61,16 @@ fn test_write_two_padding_bytes() -> std::io::Result<()> {
     template_write_test_with_text_and_expected("F", "Rg==")
 }
 
+#[test]
+fn test_write_multiword_and_padding() -> std::io::Result<()> {
+    template_write_test_with_text_and_expected("Hello world", "SGVsbG8gd29ybGQ=")
+}
+
+#[test]
+fn test_write_multiword_without_padding() -> std::io::Result<()> {
+    template_write_test_with_text_and_expected("Hello world!", "SGVsbG8gd29ybGQh")
+}
+
 fn template_write_call_return_value_test(text: &'static str) -> std::io::Result<()> {
     let mut buffer: Vec<u8> = Vec::new();
     let mut writer = Base64Writer::new(&mut buffer);
