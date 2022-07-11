@@ -27,6 +27,16 @@ fn test_read_two_padding_bytes() -> std::io::Result<()> {
     template_read_test_with_text_and_expected("Rm==", "F")
 }
 
+#[test]
+fn test_read_multiword_without_padding() -> std::io::Result<()> {
+    template_read_test_with_text_and_expected("SGVsbG8gd29ybGQh", "Hello world!")
+}
+
+#[test]
+fn test_read_multiword_with_padding() -> std::io::Result<()> {
+    template_read_test_with_text_and_expected("SGVsbG8gd29ybGQ=", "Hello world")
+}
+
 fn template_read_test_with_text_and_expected(
     text: &'static str,
     expected: &'static str,
