@@ -16,18 +16,28 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
-fn get_input(args: Args) -> std::io::Result<impl Read> {
-    std::fs::File::open(args.file.unwrap())
+fn get_input(args: Args) -> std::io::Result<Box<dyn Read>> {
+    match args.file {
+        Some(file_name) => std::fs::File::open(file_name).map(|x| Box::new(x) as Box<dyn Read>),
+        None => Ok(Box::new(std::io::stdin().lock())),
+    }
 }
 
-fn get_output() -> std::io::Result<impl Write> {
-    Ok(Base64Writer::new(std::io::stdout().lock()))
+fn get_output() -> std::io::Result<Box<impl Write>> {
+    Ok(Box::new(Base64Writer::new(std::io::stdout().lock())))
 }
 
 fn handle_arguments() -> Result<Args, &'static str> {
     let mut file: Option<String> = None;
     for arg in std::env::args() {
-        file = Some(arg)
+        match arg.as_str() {
+            "-" => {
+                file = None;
+            }
+            file_arg => {
+                file = Some(file_arg.to_owned());
+            }
+        }
     }
     Ok(Args { file })
 }
