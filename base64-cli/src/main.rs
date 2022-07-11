@@ -29,7 +29,7 @@ fn get_output() -> std::io::Result<Box<impl Write>> {
 
 fn handle_arguments() -> Result<Args, &'static str> {
     let mut file: Option<String> = None;
-    for arg in std::env::args() {
+    for arg in std::env::args().skip(1) {
         match arg.as_str() {
             "-" => {
                 file = None;
