@@ -39,3 +39,22 @@ fn test_write_unpadded() -> std::io::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn test_write_one_padding_byte() -> std::io::Result<()> {
+    let mut buffer: Vec<u8> = Vec::new();
+    let mut writer = Base64Writer::new(&mut buffer);
+    let _ = writer.write("Fo".as_bytes())?;
+    writer.flush()?;
+    assert_eq!(
+        4,
+        buffer.len(),
+        "2 input bytes should produce 4 output bytes"
+    );
+    assert_eq!(
+        "Rm8=".as_bytes(),
+        buffer,
+        "\"Fo\" should encode to \"Rm8=\""
+    );
+    Ok(())
+}
