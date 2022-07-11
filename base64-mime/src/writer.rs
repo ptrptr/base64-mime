@@ -23,11 +23,11 @@ where
 {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         match self.read_word(buf) {
-            None => Ok(0),
-            Some(word) => {
+            (None, len) => Ok(len),
+            (Some(word), len) => {
                 let encoded_word = encode_word(&word);
                 self.writer.write_all(&encoded_word[..])?;
-                Ok(4)
+                Ok(len)
             }
         }
     }
@@ -51,22 +51,25 @@ impl<W> Base64Writer<W>
 where
     W: Write,
 {
-    fn read_word(&mut self, new_bytes: &[u8]) -> Option<[u8; 3]> {
+    fn read_word(&mut self, new_bytes: &[u8]) -> (Option<[u8; 3]>, usize) {
         match (self.buffer.len(), new_bytes.len()) {
             (0, 0..=2) | (1, 1) => {
                 self.buffer.extend_from_slice(new_bytes);
-                None
+                (None, new_bytes.len())
             }
-            (0, 3..) => Some(new_bytes[0..=2].try_into().expect("should never happen")),
+            (0, 3..) => (
+                Some(new_bytes[0..=2].try_into().expect("should never happen")),
+                3,
+            ),
             (1, 2..) => {
                 let result = [self.buffer[0], new_bytes[0], new_bytes[1]];
                 self.buffer.clear();
-                Some(result)
+                (Some(result), 2)
             }
             (2, 1..) => {
                 let result = [self.buffer[0], self.buffer[1], new_bytes[0]];
                 self.buffer.clear();
-                Some(result)
+                (Some(result), 1)
             }
             (_, _) => panic!("should never happen"),
         }

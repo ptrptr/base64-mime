@@ -18,6 +18,26 @@ fn test_empty_write_all() -> std::io::Result<()> {
 }
 
 #[test]
+fn test_write_zero_bytes_return_value() -> std::io::Result<()> {
+    template_write_call_return_value_test("")
+}
+
+#[test]
+fn test_write_one_byte_return_value() -> std::io::Result<()> {
+    template_write_call_return_value_test("F")
+}
+
+#[test]
+fn test_write_two_bytes_return_value() -> std::io::Result<()> {
+    template_write_call_return_value_test("Fo")
+}
+
+#[test]
+fn test_write_three_bytes_return_value() -> std::io::Result<()> {
+    template_write_call_return_value_test("Foo")
+}
+
+#[test]
 fn test_empty_write() -> std::io::Result<()> {
     template_write_test_with_text_and_expected("", "")
 }
@@ -35,6 +55,20 @@ fn test_write_one_padding_byte() -> std::io::Result<()> {
 #[test]
 fn test_write_two_padding_bytes() -> std::io::Result<()> {
     template_write_test_with_text_and_expected("F", "Rg==")
+}
+
+fn template_write_call_return_value_test(text: &'static str) -> std::io::Result<()> {
+    let mut buffer: Vec<u8> = Vec::new();
+    let mut writer = Base64Writer::new(&mut buffer);
+    let count = writer.write(text.as_bytes())?;
+    assert_eq!(
+        text.len(),
+        count,
+        "expected write call to return {}, but got {}",
+        text.len(),
+        count,
+    );
+    Ok(())
 }
 
 fn template_write_test_with_text_and_expected(
