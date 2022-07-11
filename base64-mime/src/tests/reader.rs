@@ -9,40 +9,43 @@ fn test_new_reader() {
 
 #[test]
 fn test_empty_read_to_end() -> std::io::Result<()> {
-    let empty: String = String::new();
-    let mut reader = Base64Reader::new(empty.as_bytes());
-    let mut buf: Vec<u8> = Vec::new();
-    reader.read_to_end(&mut buf)?;
-    assert_eq!("".as_bytes(), buf, "empty should read as empty");
-    Ok(())
+    template_read_test_with_text_and_expected("", "")
 }
 
 #[test]
 fn test_read_unpadded() -> std::io::Result<()> {
-    let mut reader = Base64Reader::new("Rm9v".as_bytes());
-    let mut buf: Vec<u8> = Vec::new();
-    let count = reader.read_to_end(&mut buf)?;
-    assert_eq!(3, count, "Should read 3 bytes");
-    assert_eq!("Foo".as_bytes(), buf, "\"Rm9v\" should read as \"Foo\"");
-    Ok(())
+    template_read_test_with_text_and_expected("Rm9v", "Foo")
 }
 
 #[test]
 fn test_read_one_padding_byte() -> std::io::Result<()> {
-    let mut reader = Base64Reader::new("Rm9=".as_bytes());
-    let mut buf: Vec<u8> = Vec::new();
-    let count = reader.read_to_end(&mut buf)?;
-    assert_eq!(2, count, "Should read 2 bytes");
-    assert_eq!("Fo".as_bytes(), buf, "\"Rm9=\" should read as \"Fo\"");
-    Ok(())
+    template_read_test_with_text_and_expected("Rm9=", "Fo")
 }
 
 #[test]
 fn test_read_two_padding_bytes() -> std::io::Result<()> {
-    let mut reader = Base64Reader::new("Rm==".as_bytes());
+    template_read_test_with_text_and_expected("Rm==", "F")
+}
+
+fn template_read_test_with_text_and_expected(
+    text: &'static str,
+    expected: &'static str,
+) -> std::io::Result<()> {
+    let mut reader = Base64Reader::new(text.as_bytes());
     let mut buf: Vec<u8> = Vec::new();
     let count = reader.read_to_end(&mut buf)?;
-    assert_eq!(1, count, "Should read 1 byte");
-    assert_eq!("F".as_bytes(), buf, "\"Rm==\" should read as \"F\"");
+    assert_eq!(
+        expected.len(),
+        count,
+        "Should read {} byte(s)",
+        expected.len()
+    );
+    assert_eq!(
+        expected.as_bytes(),
+        buf,
+        "\"{}\" should read as \"{}\"",
+        text,
+        expected
+    );
     Ok(())
 }
