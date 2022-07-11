@@ -1,0 +1,9 @@
+[package]
+name = "base64-cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+base64-mime = { path = "../base64-mime" }
