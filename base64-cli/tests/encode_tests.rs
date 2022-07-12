@@ -6,12 +6,11 @@ use std::{
 mod common;
 
 #[test]
-fn integration_test_decode_file() -> std::io::Result<()> {
-    common::write_file("output2", "SGVsbG8gd29ybGQh".as_bytes())?;
+fn integration_test_encode_file() -> std::io::Result<()> {
+    common::write_file("output1", "Hello world!".as_bytes())?;
     let binary = env!("CARGO_BIN_EXE_base64-cli");
     let output = process::Command::new(binary)
-        .arg("-d")
-        .arg(common::get_file("output2"))
+        .arg(common::get_file("output1"))
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?
@@ -20,18 +19,17 @@ fn integration_test_decode_file() -> std::io::Result<()> {
     let err_output = String::from_utf8(output.stderr).expect("stderr should return valid utf-8");
     assert_eq!("", err_output, "Stderr should be empty");
     assert_eq!(
-        "Hello world!", text_output,
-        "Program should decode \"{}\" into {}",
-        "SGVsbG8gd29ybGQh", "Hello world!"
+        "SGVsbG8gd29ybGQh", text_output,
+        "Program should encode \"{}\" into {}",
+        "Hello world!", "SGVsbG8gd29ybGQh"
     );
     Ok(())
 }
 
 #[test]
-fn integration_test_decode_stdin() -> std::io::Result<()> {
+fn integration_test_encode_stdin() -> std::io::Result<()> {
     let binary = env!("CARGO_BIN_EXE_base64-cli");
     let mut command = process::Command::new(binary)
-        .arg("-d")
         .arg("-")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -41,7 +39,7 @@ fn integration_test_decode_stdin() -> std::io::Result<()> {
         .stdin
         .take()
         .and_then(|mut stdin: ChildStdin| -> Option<()> {
-            stdin.write_all("SGVsbG8gd29ybGQh".as_bytes()).unwrap();
+            stdin.write_all("Hello world!".as_bytes()).unwrap();
             stdin.flush().unwrap();
             Some(())
         })
@@ -51,18 +49,17 @@ fn integration_test_decode_stdin() -> std::io::Result<()> {
     let err_output = String::from_utf8(output.stderr).expect("stderr should return valid utf-8");
     assert_eq!("", err_output, "Stderr should be empty");
     assert_eq!(
-        "Hello world!", text_output,
-        "Program should decode \"{}\" into {}",
-        "SGVsbG8gd29ybGQh", "Hello world!"
+        "SGVsbG8gd29ybGQh", text_output,
+        "Program should encode \"{}\" into {}",
+        "Hello world!", "SGVsbG8gd29ybGQh"
     );
     Ok(())
 }
 
 #[test]
-fn integration_test_decode_default() -> std::io::Result<()> {
+fn integration_test_encode_default() -> std::io::Result<()> {
     let binary = env!("CARGO_BIN_EXE_base64-cli");
     let mut command = process::Command::new(binary)
-        .arg("-d")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .stdin(Stdio::piped())
@@ -71,7 +68,7 @@ fn integration_test_decode_default() -> std::io::Result<()> {
         .stdin
         .take()
         .and_then(|mut stdin: ChildStdin| -> Option<()> {
-            stdin.write_all("SGVsbG8gd29ybGQh".as_bytes()).unwrap();
+            stdin.write_all("Hello world!".as_bytes()).unwrap();
             stdin.flush().unwrap();
             Some(())
         })
@@ -81,9 +78,9 @@ fn integration_test_decode_default() -> std::io::Result<()> {
     let err_output = String::from_utf8(output.stderr).expect("stderr should return valid utf-8");
     assert_eq!("", err_output, "Stderr should be empty");
     assert_eq!(
-        "Hello world!", text_output,
-        "Program should decode \"{}\" into {}",
-        "SGVsbG8gd29ybGQh", "Hello world!"
+        "SGVsbG8gd29ybGQh", text_output,
+        "Program should encode \"{}\" into {}",
+        "Hello world!", "SGVsbG8gd29ybGQh"
     );
     Ok(())
 }
