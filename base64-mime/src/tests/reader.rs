@@ -23,6 +23,11 @@ fn test_read_multiworld_with_nonalphabet_word_aligned() -> std::io::Result<()> {
 }
 
 #[test]
+fn test_read_multiworld_with_nonalphabet_splitting_word() -> std::io::Result<()> {
+    template_read_test_with_text_and_expected("Rm9\r\nvRm9v", "FooFoo")
+}
+
+#[test]
 fn test_read_unpadded() -> std::io::Result<()> {
     template_read_test_with_text_and_expected("Rm9v", "Foo")
 }
