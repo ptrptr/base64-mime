@@ -77,8 +77,32 @@ fn template_read_test_with_text_and_expected(
 
 #[test]
 fn test_bad_padding_pattern_0010() -> std::io::Result<()> {
-    let pattern = [false, false, true, false];
-    template_bad_padding_test_with_pattern(pattern)
+    template_bad_padding_test_with_pattern([false, false, true, false])
+}
+
+#[test]
+fn test_bad_padding_pattern_0100() -> std::io::Result<()> {
+    template_bad_padding_test_with_pattern([false, true, false, false])
+}
+
+#[test]
+fn test_bad_padding_pattern_1000() -> std::io::Result<()> {
+    template_bad_padding_test_with_pattern([true, false, false, false])
+}
+
+#[test]
+fn test_bad_padding_pattern_0110() -> std::io::Result<()> {
+    template_bad_padding_test_with_pattern([false, true, true, false])
+}
+
+#[test]
+fn test_bad_padding_pattern_1110() -> std::io::Result<()> {
+    template_bad_padding_test_with_pattern([true, true, true, false])
+}
+
+#[test]
+fn test_bad_padding_pattern_1111() -> std::io::Result<()> {
+    template_bad_padding_test_with_pattern([true, true, true, true])
 }
 
 fn template_bad_padding_test_with_pattern(pattern: [bool; 4]) -> std::io::Result<()> {
