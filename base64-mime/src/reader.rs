@@ -37,7 +37,8 @@ where
     fn read_word(&mut self) -> std::io::Result<Option<[u8; 4]>> {
         let mut result = [0u8; 4];
         for i in 0..=3 {
-            let had_more = self.reader.read(&mut result[i..i + 1])? != 0;
+            let had_more = self.reader.read(&mut result[i..i + 1])? != 0
+                && decode_ordinal(result[i]).is_some();
             if had_more {
                 continue;
             }
@@ -53,7 +54,7 @@ where
 
 fn decode_word(word: [u8; 4], destination: &mut [u8]) -> std::io::Result<usize> {
     let symbol_count = padding_check(word)?;
-    let ordinals = word.map(decode_ordinal);
+    let ordinals = word.map(|a| decode_ordinal(a).expect("should not happen"));
     destination[0] = (ordinals[0] << 2) | (ordinals[1] >> 4);
     if symbol_count == 1 {
         return Ok(1);
@@ -78,14 +79,14 @@ fn padding_check(word: [u8; 4]) -> std::io::Result<u8> {
     }
 }
 
-fn decode_ordinal(ordinal: u8) -> u8 {
+fn decode_ordinal(ordinal: u8) -> Option<u8> {
     match ordinal as char {
-        'A'..='Z' => ordinal - 'A' as u8,
-        'a'..='z' => 26 + (ordinal - 'a' as u8),
-        '0'..='9' => 52 + (ordinal - '0' as u8),
-        '+' => 62,
-        '/' => 63,
-        '=' => 0,
-        _ => todo!("Handle bad characters"),
+        'A'..='Z' => Some(ordinal - 'A' as u8),
+        'a'..='z' => Some(26 + (ordinal - 'a' as u8)),
+        '0'..='9' => Some(52 + (ordinal - '0' as u8)),
+        '+' => Some(62),
+        '/' => Some(63),
+        '=' => Some(0),
+        _ => None,
     }
 }

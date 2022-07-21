@@ -13,6 +13,11 @@ fn test_read_empty() -> std::io::Result<()> {
 }
 
 #[test]
+fn test_read_only_nonalphabet() -> std::io::Result<()> {
+    template_read_test_with_text_and_expected("\r\n", "")
+}
+
+#[test]
 fn test_read_unpadded() -> std::io::Result<()> {
     template_read_test_with_text_and_expected("Rm9v", "Foo")
 }
