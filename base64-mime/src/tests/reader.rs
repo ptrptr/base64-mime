@@ -1,5 +1,5 @@
 use crate::Base64Reader;
-use std::io::Read;
+use std::io::{BufReader, Read};
 
 #[test]
 fn test_new_reader() {
@@ -71,6 +71,34 @@ fn template_read_test_with_text_and_expected(
         "\"{}\" should read as \"{}\"",
         text,
         expected
+    );
+    Ok(())
+}
+
+#[test]
+fn test_bad_padding_pattern_0010() -> std::io::Result<()> {
+    let pattern = [false, false, true, false];
+    template_bad_padding_test_with_pattern(pattern)
+}
+
+fn template_bad_padding_test_with_pattern(pattern: [bool; 4]) -> std::io::Result<()> {
+    let mut base_text = Vec::from("Rm9v".as_bytes());
+    for (index, value) in pattern.into_iter().enumerate() {
+        if value {
+            base_text[index] = '=' as u8;
+        }
+    }
+
+    let mut reader = Base64Reader::new(BufReader::new(&base_text[..]));
+    let mut buf: Vec<u8> = Vec::new();
+    let err = reader.read_to_end(&mut buf).expect_err("Expected error");
+    assert!(
+        err.kind().eq(&std::io::ErrorKind::InvalidData),
+        "Error should be of kind InvalidData"
+    );
+    assert!(
+        err.to_string().contains("padding"),
+        "Error description should contain \"padding\""
     );
     Ok(())
 }

@@ -81,9 +81,9 @@ fn decode_word(word: [u8; 4], destination: &mut [u8]) -> std::io::Result<usize> 
 fn padding_check(word: [u8; 4]) -> std::io::Result<u8> {
     let padding: [bool; 4] = word.map(|x| x == '=' as u8);
     match padding {
-        [true, _, _, _] | [_, true, _, _] | [false, false, true, false] => {
-            todo!("handle bad padding")
-        }
+        [true, _, _, _] | [_, true, _, _] | [false, false, true, false] => Err(
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid base64 padding"),
+        ),
         [false, false, false, false] => Ok(3),
         [false, false, false, true] => Ok(2),
         [false, false, true, true] => Ok(1),
