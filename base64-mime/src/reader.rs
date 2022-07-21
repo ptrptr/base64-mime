@@ -36,16 +36,27 @@ where
 {
     fn read_word(&mut self) -> std::io::Result<Option<[u8; 4]>> {
         let mut result = [0u8; 4];
-        for i in 0..=3 {
-            let had_more = self.reader.read(&mut result[i..i + 1])? != 0
-                && decode_ordinal(result[i]).is_some();
-            if had_more {
-                continue;
-            }
-            if i == 0 {
-                return Ok(None);
-            } else {
-                todo!("Handle EOF within word boundary")
+        let mut i = 0;
+        while i <= 3 {
+            let had_more = self.reader.read(&mut result[i..i + 1])? != 0;
+            let had_more_alphabet = had_more && decode_ordinal(result[i]).is_some();
+            let had_nothing = i == 0;
+            match (had_more, had_more_alphabet, had_nothing) {
+                (true, true, _) => {
+                    i += 1;
+                }
+                (true, false, _) => {
+                    //Try again
+                }
+                (false, true, _) => {
+                    panic!("should not happen");
+                }
+                (false, false, true) => {
+                    return Ok(None);
+                }
+                (false, false, false) => {
+                    todo!("Handle EOF within word boundary")
+                }
             }
         }
         Ok(Some(result))
