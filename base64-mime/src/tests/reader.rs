@@ -8,7 +8,7 @@ fn test_new_reader() {
 }
 
 #[test]
-fn test_empty_read_to_end() -> std::io::Result<()> {
+fn test_read_empty() -> std::io::Result<()> {
     template_read_test_with_text_and_expected("", "")
 }
 
