@@ -1,5 +1,5 @@
 use crate::Base64Reader;
-use std::io::{BufReader, Read};
+use std::io::Read;
 
 #[test]
 fn test_new_reader() {
