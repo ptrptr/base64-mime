@@ -112,17 +112,57 @@ fn template_bad_padding_test_with_pattern(pattern: [bool; 4]) -> std::io::Result
             base_text[index] = '=' as u8;
         }
     }
+    template_error_test_with_bytes_errorkind_and_contained_text(
+        &base_text[..],
+        std::io::ErrorKind::InvalidData,
+        "padding",
+    )
+}
 
-    let mut reader = Base64Reader::new(BufReader::new(&base_text[..]));
+#[test]
+fn test_unexpected_eof_length_one() -> std::io::Result<()> {
+    template_error_test_with_bytes_errorkind_and_contained_text(
+        "F".as_bytes(),
+        std::io::ErrorKind::UnexpectedEof,
+        "EOF",
+    )
+}
+
+#[test]
+fn test_unexpected_eof_length_two() -> std::io::Result<()> {
+    template_error_test_with_bytes_errorkind_and_contained_text(
+        "Fm".as_bytes(),
+        std::io::ErrorKind::UnexpectedEof,
+        "EOF",
+    )
+}
+
+#[test]
+fn test_unexpected_eof_length_three() -> std::io::Result<()> {
+    template_error_test_with_bytes_errorkind_and_contained_text(
+        "Fm9".as_bytes(),
+        std::io::ErrorKind::UnexpectedEof,
+        "EOF",
+    )
+}
+
+fn template_error_test_with_bytes_errorkind_and_contained_text(
+    bytes: &[u8],
+    errorkind: std::io::ErrorKind,
+    contained_text: &'static str,
+) -> std::io::Result<()> {
+    let mut reader = Base64Reader::new(bytes);
     let mut buf: Vec<u8> = Vec::new();
     let err = reader.read_to_end(&mut buf).expect_err("Expected error");
     assert!(
-        err.kind().eq(&std::io::ErrorKind::InvalidData),
-        "Error should be of kind InvalidData"
+        err.kind().eq(&errorkind),
+        "Error should be of kind {}",
+        errorkind.to_string()
     );
     assert!(
-        err.to_string().contains("padding"),
-        "Error description should contain \"padding\""
+        err.to_string().contains(contained_text),
+        "Error description should contain \"{}\"",
+        contained_text
     );
     Ok(())
 }

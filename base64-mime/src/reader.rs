@@ -1,4 +1,4 @@
-use std::io::{BufRead, Read};
+use std::io::{BufRead, Error, Read};
 
 pub struct Base64Reader<R: BufRead> {
     reader: R,
@@ -55,7 +55,10 @@ where
                     return Ok(None);
                 }
                 (false, false, false) => {
-                    todo!("Handle EOF within word boundary")
+                    return Err(Error::new(
+                        std::io::ErrorKind::UnexpectedEof,
+                        "Unexpected EOF while decoding base64",
+                    ));
                 }
             }
         }
