@@ -1,7 +1,7 @@
 use std::process::{self, Stdio};
 
 #[test]
-fn integration_test_h_parameter_has_output() -> std::io::Result<()> {
+fn integration_test_h_parameter_has_usage() -> std::io::Result<()> {
     let output = template_get_output_for_argument("-h")?;
     assert!(
         output.contains("Usage"),
@@ -12,7 +12,7 @@ fn integration_test_h_parameter_has_output() -> std::io::Result<()> {
 }
 
 #[test]
-fn integration_test_help_parameter_has_output() -> std::io::Result<()> {
+fn integration_test_help_parameter_has_usage() -> std::io::Result<()> {
     let output = template_get_output_for_argument("--help")?;
     assert!(
         output.contains("Usage"),
