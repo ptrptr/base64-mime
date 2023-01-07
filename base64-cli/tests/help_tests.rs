@@ -1,22 +1,22 @@
 use std::process::{self, Stdio};
 
 #[test]
-fn integration_test_h_parameter_has_usage() -> std::io::Result<()> {
-    let output = template_get_output_for_argument("-h")?;
-    assert!(
-        output.contains("Usage"),
-        "-h parameter should return something describing usage, but got {}",
-        output
+fn integration_test_help_parameter_is_same_as_h_parameter() -> std::io::Result<()> {
+    let output1: String = template_get_output_for_argument("--help")?;
+    let output2: String = template_get_output_for_argument("-h")?;
+    assert_eq!(
+        output1, output2,
+        "Help output should not depend on parameter being short or long"
     );
     Ok(())
 }
 
 #[test]
-fn integration_test_help_parameter_has_usage() -> std::io::Result<()> {
-    let output = template_get_output_for_argument("--help")?;
+fn integration_test_h_parameter_has_usage() -> std::io::Result<()> {
+    let output = template_get_output_for_argument("-h")?;
     assert!(
         output.contains("Usage"),
-        "--help parameter should return something describing usage, but got {}",
+        "-h parameter should return something describing usage, but got {}",
         output
     );
     Ok(())
