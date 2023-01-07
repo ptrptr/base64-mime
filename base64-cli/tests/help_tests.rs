@@ -12,11 +12,37 @@ fn integration_test_help_parameter_is_same_as_h_parameter() -> std::io::Result<(
 }
 
 #[test]
+fn integration_test_h_parameter_has_options() -> std::io::Result<()> {
+    let output = template_get_output_for_argument("-h")?;
+    assert!(
+        output.contains("Options:"),
+        "-h parameter should return something describing options, but got:\n{}",
+        output
+    );
+    assert!(
+        output.contains("-d"),
+        "-h parameter should return something describing decode option, but got:\n{}",
+        output
+    );
+    assert!(
+        output.contains("-h"),
+        "-h parameter should return something describing short help option, but got:\n{}",
+        output
+    );
+    assert!(
+        output.contains("--help"),
+        "-h parameter should return something describing long help option, but got:\n{}",
+        output
+    );
+    Ok(())
+}
+
+#[test]
 fn integration_test_h_parameter_has_usage() -> std::io::Result<()> {
     let output = template_get_output_for_argument("-h")?;
     assert!(
-        output.contains("Usage"),
-        "-h parameter should return something describing usage, but got {}",
+        output.contains("Usage:"),
+        "-h parameter should return something describing usage, but got:\n{}",
         output
     );
     Ok(())

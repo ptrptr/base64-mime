@@ -26,9 +26,18 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
+const USAGE_TEXT: &str = r"Usage: base64-cli [OPTION]... [FILE]
+
+Base64 encode or decode standard input or optionally a given file and output to standard output.
+
+Options:
+    -d              Decode input instead of encoding,
+    -h, --help      Print this usage
+";
+
 fn print_usage(args: &Args) -> bool {
     args.print_usage && {
-        println!("Usage:");
+        print!("{}", USAGE_TEXT);
         true
     }
 }
