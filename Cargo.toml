@@ -4,3 +4,5 @@ members = [
     "base64-mime",
     "base64-cli",
 ]
+
+resolver = "2"
