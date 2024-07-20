@@ -2,6 +2,8 @@ use std::io::{BufRead, Error, Read};
 
 pub struct Base64Reader<R: BufRead> {
     reader: R,
+    small_buffer: [u8; 3],
+    small_buffer_len: u8,
 }
 
 impl<R> Base64Reader<R>
@@ -9,7 +11,11 @@ where
     R: BufRead,
 {
     pub fn new(reader: R) -> Base64Reader<R> {
-        Base64Reader { reader }
+        Base64Reader {
+            reader,
+            small_buffer: [0, 0, 0],
+            small_buffer_len: 0u8,
+        }
     }
 }
 
@@ -18,12 +24,32 @@ where
     R: BufRead,
 {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        let drained_small_buffer = self.drain_small_buffer(buf);
+        if drained_small_buffer > 0usize {
+            return Ok(drained_small_buffer);
+        }
         let maybe_word = self.read_word()?;
         match maybe_word {
             Some(word) => {
-                let mut destination = &mut buf[0..4];
-                let count = decode_word(word, &mut destination)?;
-                Ok(count)
+                if buf.len() >= 4 {
+                    let mut destination = &mut buf[0..4];
+                    let count = decode_word(word, &mut destination)?;
+                    Ok(count)
+                } else {
+                    let mut destination: [u8; 4] = [0, 0, 0, 0];
+                    let count = decode_word(word, &mut destination)?;
+                    if count == 0 {
+                        return Ok(0);
+                    }
+                    for cursor in 0..buf.len() {
+                        buf[cursor] = destination[cursor];
+                    }
+                    for cursor in buf.len()..count {
+                        self.small_buffer[cursor - buf.len()] = destination[cursor];
+                    }
+                    self.small_buffer_len = (count - buf.len()) as u8;
+                    Ok(buf.len())
+                }
             }
             None => Ok(0),
         }
@@ -34,6 +60,39 @@ impl<R> Base64Reader<R>
 where
     R: BufRead,
 {
+    fn clear_small_buffer(&mut self) {
+        self.small_buffer = [0u8; 3];
+        self.small_buffer_len = 0;
+    }
+
+    fn drain_small_buffer(&mut self, buf: &mut [u8]) -> usize {
+        if self.small_buffer_len == 0 {
+            return 0;
+        }
+        for cursor_write in 0..buf.len() {
+            if self.small_buffer_len as usize == cursor_write {
+                self.clear_small_buffer();
+                return cursor_write;
+            }
+            buf[cursor_write] = self.small_buffer[cursor_write];
+        }
+        match self.small_buffer_len - (buf.len() as u8) {
+            0 => self.clear_small_buffer(),
+            1 => {
+                self.small_buffer_len = 1;
+                self.small_buffer = [self.small_buffer[buf.len()], 0, 0]
+            }
+            2 => {
+                self.small_buffer_len = 2;
+                self.small_buffer = [self.small_buffer[1], self.small_buffer[2], 0];
+            }
+            _ => {
+                panic!("small buffer has length of 3 maximum");
+            }
+        }
+        buf.len()
+    }
+
     fn read_word(&mut self) -> std::io::Result<Option<[u8; 4]>> {
         let mut result = [0u8; 4];
         let mut i = 0;
